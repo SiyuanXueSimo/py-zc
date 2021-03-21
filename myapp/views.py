@@ -1,6 +1,14 @@
 from django.shortcuts import render
 from django.http import HttpResponse
+from django.db import connections
+from django.db.utils import OperationalError
 
 # Create your views here.
 def index(request):
-    return HttpResponse("Hello, world. You're at the polls index hahahaha.")
+    db_conn = connections['default']
+    try:
+        c = db_conn.cursor()
+    except OperationalError:
+        return HttpResponse("Not connected")
+    else:
+        return HttpResponse("Connected")

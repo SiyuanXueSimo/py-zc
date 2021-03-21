@@ -1,0 +1,40 @@
+version: '3'
+services:
+    mariadb:
+        image: mariadb:10.5
+        environment:
+            MYSQL_ROOT_PASSWORD: admin
+            MYSQL_DATABASE: product_db
+            MYSQL_USER: sa
+            MYSQL_PASSWORD: admin
+        restart: on-failure
+        # volumes:
+        #  - ${PWD}/mariadb:/var/lib/mysql
+        networks:
+            - mynetwork
+    phpmyadmin:
+        image: phpmyadmin/phpmyadmin:latest
+        ports:
+            - 8002:80
+        environment:
+            - PMA_ARBITRARY=1
+            - PMA_HOST=mariadb
+        depends_on:
+            - mariadb
+        restart: on-failure
+        networks:
+            - mynetwork
+    myapp:
+        build:
+            context: .
+            dockerfile: Dockerfile
+        command: python manage.py runserver 0.0.0.0:8000
+        volumes:
+            - .:/app
+        ports:
+            - "8001:8000"
+        restart: on-failure
+        networks:
+            - mynetwork
+networks:
+    mynetwork:
